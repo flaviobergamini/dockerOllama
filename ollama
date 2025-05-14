@@ -1,20 +1,36 @@
 @echo off
-echo [1/4] Iniciando container Docker com suporte a GPU...
-
+echo Iniciando container Docker com suporte a GPU
+echo ----------------------------------------------------------------
 docker run --gpus all -d -p 11434:11434 --name ollama-deepseek -v ollama:/root/.ollama ollama/ollama
 
-echo [2/4] Aguardando o container iniciar...
+echo.
+echo Aguardando o container iniciar...
+echo ----------------------------------------------------------------
 timeout /t 5 > nul
 
-echo [3/4] Baixando o modelo quantizado deepseek-r1:8b-q4_0...
+echo.
+echo Baixando o modelo quantizado deepseek-r1:32b
+echo ----------------------------------------------------------------
 docker exec -it ollama-deepseek ollama pull deepseek-r1:32b
 
-echo [4/4] Configurando redirecionamento de porta externa (se necessário)...
+echo.
+
+echo Configurando redirecionamento de porta externa (se necessario)
+echo ----------------------------------------------------------------
 netsh interface portproxy add v4tov4 listenaddress=0.0.0.0 listenport=11434 connectaddress=127.0.0.1 connectport=11434
+
+echo +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+echo Configurando regra de acesso da porta 11434 no Firewall (REQUER PRIVILEGIO DE USUARIO)
+New-NetFirewallRule -DisplayName "Liberar Ollama API" `
+ -Direction Inbound -Action Allow -Protocol TCP -LocalPort 11434 `
+ -Profile Domain,Private,Public
 
 echo.
-echo ✅ Ollama está rodando e acessível em http://200.235.67.156:11434/api/tags
+echo Conferindo regra criada
+echo ----------------------------------------------------------------
+Get-NetFirewallRule | Where-Object DisplayName -EQ "Liberar Ollama API"
+
+echo.
+echo Ollama esta rodando e acessível em http://localhost:11434/api/tags
 echo Use no Postman ou navegador!
 pause
-
-netsh interface portproxy add v4tov4 listenaddress=0.0.0.0 listenport=11434 connectaddress=127.0.0.1 connectport=11434
