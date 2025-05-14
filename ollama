@@ -1,0 +1,18 @@
+@echo off
+echo [1/4] Iniciando container Docker com suporte a GPU...
+
+docker run --gpus all -d -p 11434:11434 --name ollama-deepseek -v ollama:/root/.ollama ollama/ollama
+
+echo [2/4] Aguardando o container iniciar...
+timeout /t 5 > nul
+
+echo [3/4] Baixando o modelo quantizado deepseek-r1:8b-q4_0...
+docker exec -it ollama-deepseek ollama pull deepseek-r1:32b
+
+echo [4/4] Configurando redirecionamento de porta externa (se necessário)...
+netsh interface portproxy add v4tov4 listenaddress=0.0.0.0 listenport=11434 connectaddress=127.0.0.1 connectport=11434
+
+echo.
+echo ✅ Ollama está rodando e acessível em http://200.235.67.156:11434/api/tags
+echo Use no Postman ou navegador!
+pause
