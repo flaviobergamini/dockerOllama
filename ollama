@@ -16,3 +16,5 @@ echo.
 echo ✅ Ollama está rodando e acessível em http://200.235.67.156:11434/api/tags
 echo Use no Postman ou navegador!
 pause
+
+netsh interface portproxy add v4tov4 listenaddress=0.0.0.0 listenport=11434 connectaddress=127.0.0.1 connectport=11434
